@@ -49,7 +49,7 @@ def eztraction(file_path,file_name):
     with ZipFile(os.path.join(file_path,file_name)) as file:
         return file.extractall()
     
-def imageDataGeneration(path,val_split): 
+def imageDataGeneration(path,val_split,batch_size,labels): 
     train_path=path+'train'
     test_path=path+'test'
 
