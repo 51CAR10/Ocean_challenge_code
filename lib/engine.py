@@ -51,10 +51,29 @@ def eztraction(file_path,file_name):
     with ZipFile(os.path.join(file_path,file_name)) as file:
         return file.extractall()
     
-def imageDataGeneration(path,val_split,batch_size,labels,img_rows): 
-    train_path=path+'train'
-    test_path=path+'test'
 
+
+
+
+def test_Generation(path,batch_size,labels,img_rows):
+    test_path=path+'test'
+    test_datagen = ImageDataGenerator(
+    rescale=1.0/255.0
+    )   
+
+    test_generator = test_datagen.flow_from_directory(
+    directory = test_path,
+    classes = labels,
+    class_mode='binary',
+    seed = seed,
+    batch_size = batch_size, 
+    shuffle = True,
+    target_size=(img_rows, img_rows))
+    return test_generator
+
+
+def train_Generation(path,val_split,batch_size,labels,img_rows):
+    train_path=path+'train'
     train_datagen = ImageDataGenerator(
     validation_split = val_split,
     rescale=1.0/255.0,
@@ -70,9 +89,10 @@ def imageDataGeneration(path,val_split,batch_size,labels,img_rows):
     class_mode='binary',
     shuffle = True,
     target_size=(img_rows, img_rows),
-    subset = 'training'
-)
+    subset = 'training')
+    return train_generator
 
+def val_Generation(path,val_split,batch_size,labels,img_rows): 
     val_datagen = ImageDataGenerator(
     validation_split = val_split,
     rescale=1.0/255.0,
@@ -88,23 +108,10 @@ def imageDataGeneration(path,val_split,batch_size,labels,img_rows):
     class_mode='binary',
     shuffle = True,
     target_size=(img_rows, img_rows),
-    subset = 'validation'
-)
+    subset = 'validation')
 
-    test_datagen = ImageDataGenerator(
-    rescale=1.0/255.0
-    )   
-
-    test_generator = test_datagen.flow_from_directory(
-    directory = test_path,
-    classes = labels,
-    class_mode='binary',
-    seed = seed,
-    batch_size = batch_size, 
-    shuffle = True,
-    target_size=(img_rows, img_rows)
-)
-    return train_generator,val_generator,test_generator
+    return val_generator
+   
 
 def vgg16_model(input_shape,weights):
     vgg=vgg16.VGG16(include_top=False, weights=weights, input_shape=input_shape)
@@ -176,3 +183,9 @@ def img_to_tensor_(img_dim,test_file_path):
     test_img_scaled=test_imgs.astype('float32')
     test_img_scaled/=255
     return test_img_scaled
+
+def predict(model,scaled_img):
+    fine_tuned_model=keras.models.load_model('ocean_challenge_fine_tuning_vgg16.h5')
+    prediction=fine_tuned_model.predict(scaled_img,verbose=0)
+    return prediction
+
